@@ -1,13 +1,9 @@
 <html>
-
-<!-- Ultimate Game Stash file--> 
-<!-- For the regularly updating doc go to https://docs.google.com/document/d/1_FmH3BlSBQI7FGgAQL59-ZPe8eCxs35wel6JUyVaG8Q/ -->
-
-
-  <head>
+<head>
     <script>
       window.gameconfig = {
         name: "Legend of Zelda, The - Ocarina of Time (USA)",
+        url: "Legend of Zelda, The - Ocarina of Time (U) (V1.2) [!].z64", 
         core: "n64",
         min: 1,
         max: 2,
@@ -24,14 +20,20 @@
               resolve(mergedFileUrl);
               return;
             }
+            
+            
+            if (typeof cb === 'function') cb(index + 1);
+
             fetch(fileParts[index])
-              .then((response) => response.arrayBuffer())
+              .then((response) => {
+                if (!response.ok) throw new Error(`Chunk ${index + 1} failed to download.`);
+                return response.arrayBuffer();
+              })
               .then((data) => {
                 buffers.push(data);
                 fetchPart(index + 1);
               })
               .catch(reject);
-            cb(index);
           }
           fetchPart(0);
         });
@@ -76,7 +78,7 @@
   <body>
     <div id="game-container">
       <div id="game"></div>
-      <div id="loading-progress">Loading: 0/0</div>
+      <div id="loading-progress">Loading: 0/2</div>
       <div id="first-time">First-time loading may take longer...</div>
     </div>
     <script>
@@ -89,34 +91,33 @@
 
       function updateLoadingProgress(loaded) {
         const progressElement = document.getElementById("loading-progress");
-        if (loaded === 0) {
-          progressElement.textContent = "Loading: 0/0";
-        } else {
+        if (progressElement) {
           progressElement.textContent = `Loading: ${loaded}/${totalParts}`;
         }
       }
 
-      Promise.all([mergeFiles(parts, updateLoadingProgress)])
-        .then(([gameUrl]) => {
-          document.getElementById("loading-progress").remove();
-          document.getElementById("first-time").remove();
+      mergeFiles(parts, updateLoadingProgress)
+        .then((gameUrl) => {
+          if (document.getElementById("loading-progress")) document.getElementById("loading-progress").remove();
+          if (document.getElementById("first-time")) document.getElementById("first-time").remove();
+          
           EJS_player = "#game";
           EJS_core = window.gameconfig.core;
           EJS_gameName = window.gameconfig.name;
           EJS_color = "#0064ff";
           EJS_startOnLoaded = true;
-          EJS_pathtodata = "https://cdn.jsdelivr.net/gh/genizy/emu@master/";
+          EJS_pathtodata = "data/"; 
           EJS_gameUrl = gameUrl;
+          
           const script = document.createElement("script");
-          script.src =
-            "https://cdn.jsdelivr.net/gh/genizy/emu@master/loader.js";
+          script.src = "loader.js"; 
           document.body.appendChild(script);
         })
         .catch((error) => {
           console.error(error);
-          document.getElementById("loading-progress").textContent =
-            "Error loading game.";
+          const progressElement = document.getElementById("loading-progress");
+          if (progressElement) progressElement.textContent = "Error loading game.";
         });
     </script>
   </body>
-</html> 
+</html>
