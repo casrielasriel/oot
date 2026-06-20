@@ -1,9 +1,13 @@
+<!DOCTYPE html>
 <html>
-<head>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>The Legend of Zelda: Ocarina of Time</title>
     <script>
       window.gameconfig = {
         name: "Legend of Zelda, The - Ocarina of Time (USA)",
-        url: "Legend of Zelda, The - Ocarina of Time (U) (V1.2) [!].z64", 
+        url: "Legend of Zelda, The - Ocarina of Time (U) (V1.2) [!].z64",
         core: "n64",
         min: 1,
         max: 2,
@@ -21,12 +25,11 @@
               return;
             }
             
-            
             if (typeof cb === 'function') cb(index + 1);
 
             fetch(fileParts[index])
               .then((response) => {
-                if (!response.ok) throw new Error(`Chunk ${index + 1} failed to download.`);
+                if (!response.ok) throw new Error(`Chunk ${index + 1} failed to load.`);
                 return response.arrayBuffer();
               })
               .then((data) => {
@@ -38,6 +41,7 @@
           fetchPart(0);
         });
       }
+
       function getParts(file, start, end) {
         let parts = [];
         for (let i = start; i <= end; i++) {
@@ -59,9 +63,14 @@
         background-color: #121212;
         color: white;
         font-family: Arial, sans-serif;
+        overflow: hidden;
       }
       #game-container {
         text-align: center;
+        width: 100%;
+        height: 100%;
+      }
+      #game {
         width: 100%;
         height: 100%;
       }
@@ -79,7 +88,7 @@
     <div id="game-container">
       <div id="game"></div>
       <div id="loading-progress">Loading: 0/2</div>
-      <div id="first-time">First-time loading may take longer...</div>
+      <div id="first-time"><br>First-time loading may take longer...</div>
     </div>
     <script>
       var parts = getParts(
@@ -106,17 +115,17 @@
           EJS_gameName = window.gameconfig.name;
           EJS_color = "#0064ff";
           EJS_startOnLoaded = true;
-          EJS_pathtodata = "data/"; 
           EJS_gameUrl = gameUrl;
+          EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/"; 
           
           const script = document.createElement("script");
-          script.src = "loader.js"; 
+          script.src = "https://cdn.emulatorjs.org/stable/data/loader.js";
           document.body.appendChild(script);
         })
         .catch((error) => {
           console.error(error);
           const progressElement = document.getElementById("loading-progress");
-          if (progressElement) progressElement.textContent = "Error loading game.";
+          if (progressElement) progressElement.textContent = "Error loading game data.";
         });
     </script>
   </body>
